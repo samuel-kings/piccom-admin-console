@@ -9,7 +9,6 @@ import CreateModal from '../components/challenges/CreateModal';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import EditModal from '../components/challenges/EditModal';
 import BanModal from '../components/challenges/BanModal';
-import TagsModal from '../components/challenges/TagsModal';
 
 const Challenges: React.FC = () => {
   const { showToast } = useToast();
