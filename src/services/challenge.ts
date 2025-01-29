@@ -49,7 +49,7 @@ export const getChallengePostsCount = async (challengeId: string): Promise<numbe
 export const fetchChallenges = async ({ statusFilter, searchQuery, currentPage, itemsPerPage }: ChallengeFilters) => {
   try {
     const queries: string[] = [
-      Query.orderDesc('endDate')
+      Query.orderAsc('endDate')
     ];
     
     if (statusFilter !== 'all') {
@@ -183,6 +183,8 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
       throw new Error("Error uploading file");
     }
 
+    console.log("File uploaded successfully");
+
     await database.createDocument(
       AppwriteConsts.databaseId,
       AppwriteConsts.challengesCollection,
@@ -190,7 +192,9 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
       challenge.toMap()
     );
 
-    return challengeId;
+    console.log("Challenge created successfully");
+
+    return true;
   } catch (error) {
     console.error('Error creating challenge:', error);
     throw error;

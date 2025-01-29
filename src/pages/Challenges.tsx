@@ -70,7 +70,6 @@ const Challenges: React.FC = () => {
 
   const handleCreateChallenge = async (challenge: Challenge) => {
     try {
-      await updateChallenge(challenge);
       showToast(`Challenge "${challenge.title}" has been created`, 'success');
       setShowCreateModal(false);
       await loadChallenges();
