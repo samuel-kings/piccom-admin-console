@@ -11,6 +11,7 @@ export interface DashboardStats {
   totalPosts: number;
   newPosts: number;
   newReports: number;
+  newTickets: number;
 }
 
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
@@ -59,6 +60,11 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       AppwriteConsts.reportsCollection,
       [Query.greaterThanEqual("$createdAt", startOfDay.toISOString())]
     ),
+    newTickets: database.listDocuments(
+      AppwriteConsts.databaseId,
+      AppwriteConsts.supportTicketsCollection,
+      [Query.equal("isNew", true)]
+    ),
   };
 
   try {
@@ -71,6 +77,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       postsRes,
       newPostsRes,
       newReportsRes,
+      newTicketsRes,
     ] = await Promise.all([
       queries.totalUsers,
       queries.newUsers,
@@ -80,6 +87,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       queries.posts,
       queries.newPosts,
       queries.newReports,
+      queries.newTickets,
     ]);
 
     return {
@@ -91,6 +99,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       totalPosts: postsRes.total,
       newPosts: newPostsRes.total,
       newReports: newReportsRes.total,
+      newTickets: newTicketsRes.total,
     };
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);

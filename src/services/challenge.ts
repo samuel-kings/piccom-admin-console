@@ -29,14 +29,16 @@ export const getSubsCount = async (challengeId: string) => {
   }
 };
 
-export const getChallengePostsCount = async (challengeId: string): Promise<number> => {
+export const getChallengePostsCount = async (
+  challengeId: string
+): Promise<number> => {
   try {
     const res = await database.listDocuments(
       AppwriteConsts.databaseId,
       AppwriteConsts.postsCollection,
       [
         Query.equal('challengeId', challengeId),
-        Query.equal('status', 'published')
+        Query.equal('status', 'published'),
       ]
     );
     return res.total;
@@ -46,12 +48,15 @@ export const getChallengePostsCount = async (challengeId: string): Promise<numbe
   }
 };
 
-export const fetchChallenges = async ({ statusFilter, searchQuery, currentPage, itemsPerPage }: ChallengeFilters) => {
+export const fetchChallenges = async ({
+  statusFilter,
+  searchQuery,
+  currentPage,
+  itemsPerPage,
+}: ChallengeFilters) => {
   try {
-    const queries: string[] = [
-      Query.orderAsc('endDate')
-    ];
-    
+    const queries: string[] = [Query.orderAsc('endDate')];
+
     if (statusFilter !== 'all') {
       queries.push(Query.equal('status', statusFilter));
     }
@@ -77,17 +82,17 @@ export const fetchChallenges = async ({ statusFilter, searchQuery, currentPage, 
         const challenge = Challenge.fromMap(doc);
         const subsCountRes = await getSubsCount(challenge.$id);
         const postsCount = await getChallengePostsCount(challenge.$id);
-        
+
         challenge.totalPosts = postsCount;
-        challenge.totalSubs = subsCountRes?.subCount as number || 0;
-        
+        challenge.totalSubs = (subsCountRes?.subCount as number) || 0;
+
         return challenge;
       })
     );
 
     return {
       challenges: challengesList,
-      total: res.total
+      total: res.total,
     };
   } catch (error) {
     console.error('Error fetching challenges:', error);
@@ -118,7 +123,6 @@ export const updateChallenge = async (challenge: Challenge) => {
 export const createChallenge = async (challenge: Challenge, file: File) => {
   try {
     const isVideo =
-
       challenge.type === ChallengeType.VideoFromCamera ||
       challenge.type === ChallengeType.VideoFromGallery;
 
@@ -128,7 +132,7 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
       const duration = await _getVideoDuration(file);
 
       if (duration > 60) {
-        throw new Error("Video must be less than 60 seconds");
+        throw new Error('Video must be less than 60 seconds');
       }
 
       challengeId = (await _uploadFile(file, false)) || null;
@@ -137,10 +141,10 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
     }
 
     if (challengeId === null) {
-      throw new Error("Error uploading file");
+      throw new Error('Error uploading file');
     }
 
-    console.log("File uploaded successfully");
+    console.log('File uploaded successfully');
 
     await database.createDocument(
       AppwriteConsts.databaseId,
@@ -149,7 +153,7 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
       challenge.toMap()
     );
 
-    console.log("Challenge created successfully");
+    console.log('Challenge created successfully');
 
     return true;
   } catch (error) {
@@ -160,14 +164,16 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
 
 export const deleteChallenge = async (challenge: Challenge) => {
   try {
-    const isVideo = 
-      challenge.type === ChallengeType.VideoFromCamera || 
+    const isVideo =
+      challenge.type === ChallengeType.VideoFromCamera ||
       challenge.type === ChallengeType.VideoFromGallery;
 
     // Delete the challenge file from storage
     try {
       await storage.deleteFile(
-        isVideo ? AppwriteConsts.challengeVideosBucket : AppwriteConsts.challengeImagesAndThumbsBucket,
+        isVideo
+          ? AppwriteConsts.challengeVideosBucket
+          : AppwriteConsts.challengeImagesAndThumbsBucket,
         challenge.$id
       );
     } catch (error) {
@@ -189,17 +195,17 @@ export const deleteChallenge = async (challenge: Challenge) => {
 
 const _getVideoDuration = (file: File): Promise<number> => {
   return new Promise((resolve, reject) => {
-    const video = document.createElement("video");
+    const video = document.createElement('video');
     const url = URL.createObjectURL(file);
     video.src = url;
 
-    video.addEventListener("loadedmetadata", () => {
+    video.addEventListener('loadedmetadata', () => {
       resolve(video.duration);
       URL.revokeObjectURL(url);
     });
 
-    video.addEventListener("error", e => {
-      reject(new Error("Error loading video: " + e.message));
+    video.addEventListener('error', (e) => {
+      reject(new Error('Error loading video: ' + e.message));
       URL.revokeObjectURL(url);
     });
 
@@ -215,20 +221,22 @@ const _uploadFile = async (
     const bucketId = isImage
       ? AppwriteConsts.challengeImagesAndThumbsBucket
       : AppwriteConsts.challengeVideosBucket;
-      
+
     const resourceId = ID.unique();
 
-    console.log(`Uploading ${isImage ? "image" : "video"} to storage`);
+    console.log(`Uploading ${isImage ? 'image' : 'video'} to storage`);
 
     const res = await storage.createFile(bucketId, resourceId, file);
-    console.log(`${isImage ? "Image" : "Video"} uploaded successfully`);
+    console.log(`${isImage ? 'Image' : 'Video'} uploaded successfully`);
     return res.$id;
   } catch (e) {
     if (e instanceof AppwriteException) {
-      console.error(`Error uploading ${isImage ? "image" : "video"}: ${e.toString()}`);
+      console.error(
+        `Error uploading ${isImage ? 'image' : 'video'}: ${e.toString()}`
+      );
       return null;
     } else {
-      console.error(`Error uploading ${isImage ? "image" : "video"}: ${e}`);
+      console.error(`Error uploading ${isImage ? 'image' : 'video'}: ${e}`);
       return null;
     }
   }

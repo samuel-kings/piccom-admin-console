@@ -12,6 +12,7 @@ import Challenges from './pages/Challenges';
 import Feedback from './pages/Feedback';
 import Reports from './pages/Reports';
 import Support from './pages/Support';
+import TicketDetails from './pages/TicketDetails';
 import Blogs from './pages/Blogs';
 import Posts from './pages/Posts';
 
@@ -35,6 +36,7 @@ const App: React.FC = () => {
       <Route path="/feedback" element={withDashboard(Feedback)} />
       <Route path="/reports" element={withDashboard(Reports)} />
       <Route path="/support" element={withDashboard(Support)} />
+      <Route path="/support/:ticketId" element={withDashboard(TicketDetails)} />
       <Route path="/blogs" element={withDashboard(Blogs)} />
       <Route path="/posts" element={withDashboard(Posts)} />
     </Routes>

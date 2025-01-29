@@ -18,7 +18,6 @@ const navItems: NavItem[] = [
   { path: '/feedback', label: 'Feedback' },
   { path: '/reports', label: 'Reports' },
   { path: '/support', label: 'Support' },
-  { path: '/blogs', label: 'Blogs' },
 ];
 
 const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
