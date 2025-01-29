@@ -115,49 +115,6 @@ export const updateChallenge = async (challenge: Challenge) => {
   }
 };
 
-export const getVideoDuration = (file: File): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement("video");
-    const url = URL.createObjectURL(file);
-    video.src = url;
-
-    video.addEventListener("loadedmetadata", () => {
-      resolve(video.duration);
-      URL.revokeObjectURL(url);
-    });
-
-    video.addEventListener("error", e => {
-      reject(new Error("Error loading video: " + e.message));
-      URL.revokeObjectURL(url);
-    });
-
-    video.load();
-  });
-};
-
-export const uploadFile = async (
-  file: File,
-  isImage: boolean
-): Promise<string | null> => {
-  try {
-    const bucketId = isImage
-      ? AppwriteConsts.challengeImagesAndThumbsBucket
-      : AppwriteConsts.challengeVideosBucket;
-
-    const res = await storage.createFile(bucketId, ID.unique(), file);
-    console.log(`${isImage ? "Image" : "Video"} uploaded successfully`);
-    return res.$id;
-  } catch (e) {
-    if (e instanceof AppwriteException) {
-      console.error(`Error uploading ${isImage ? "image" : "video"}: ${e.toString()}`);
-      return null;
-    } else {
-      console.error(`Error uploading ${isImage ? "image" : "video"}: ${e}`);
-      return null;
-    }
-  }
-};
-
 export const createChallenge = async (challenge: Challenge, file: File) => {
   try {
     const isVideo =
@@ -165,21 +122,21 @@ export const createChallenge = async (challenge: Challenge, file: File) => {
       challenge.type === ChallengeType.VideoFromCamera ||
       challenge.type === ChallengeType.VideoFromGallery;
 
-    let challengeId = "";
+    let challengeId = null;
 
     if (isVideo) {
-      const duration = await getVideoDuration(file);
+      const duration = await _getVideoDuration(file);
 
       if (duration > 60) {
         throw new Error("Video must be less than 60 seconds");
       }
 
-      challengeId = (await uploadFile(file, false)) || "";
+      challengeId = (await _uploadFile(file, false)) || null;
     } else {
-      challengeId = (await uploadFile(file, true)) || "";
+      challengeId = (await _uploadFile(file, true)) || null;
     }
 
-    if (challengeId === "") {
+    if (challengeId === null) {
       throw new Error("Error uploading file");
     }
 
@@ -227,5 +184,52 @@ export const deleteChallenge = async (challenge: Challenge) => {
   } catch (error) {
     console.error('Error deleting challenge:', error);
     throw error;
+  }
+};
+
+const _getVideoDuration = (file: File): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    const url = URL.createObjectURL(file);
+    video.src = url;
+
+    video.addEventListener("loadedmetadata", () => {
+      resolve(video.duration);
+      URL.revokeObjectURL(url);
+    });
+
+    video.addEventListener("error", e => {
+      reject(new Error("Error loading video: " + e.message));
+      URL.revokeObjectURL(url);
+    });
+
+    video.load();
+  });
+};
+
+const _uploadFile = async (
+  file: File,
+  isImage: boolean
+): Promise<string | null> => {
+  try {
+    const bucketId = isImage
+      ? AppwriteConsts.challengeImagesAndThumbsBucket
+      : AppwriteConsts.challengeVideosBucket;
+      
+    const resourceId = ID.unique();
+
+    console.log(`Uploading ${isImage ? "image" : "video"} to storage`);
+
+    const res = await storage.createFile(bucketId, resourceId, file);
+    console.log(`${isImage ? "Image" : "Video"} uploaded successfully`);
+    return res.$id;
+  } catch (e) {
+    if (e instanceof AppwriteException) {
+      console.error(`Error uploading ${isImage ? "image" : "video"}: ${e.toString()}`);
+      return null;
+    } else {
+      console.error(`Error uploading ${isImage ? "image" : "video"}: ${e}`);
+      return null;
+    }
   }
 };

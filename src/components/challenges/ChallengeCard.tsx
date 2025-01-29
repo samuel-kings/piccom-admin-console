@@ -60,11 +60,18 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
       >
         <div className="bg-white dark:bg-dark-surface rounded-lg shadow-sm overflow-hidden h-[440px] flex flex-col dark:border dark:border-dark-border transition-colors">
           <div className="relative">
-            <img
+            {/* show image for image challenges */}
+          {!isVideoChallenge(challenge.type) && <img
               src={UrlHelper.getChallengeImageUrl(challenge.$id)}
               alt={challenge.title}
               className="w-full h-64 object-cover"
-            />
+            />}
+          
+            {/* show video preview */}
+          {isVideoChallenge(challenge.type) && (
+            <video src={UrlHelper.getChallengeVideoUrl(challenge.$id)} className="w-full h-64 object-cover"></video>
+          ) }
+            
             {isVideoChallenge(challenge.type) && (
               <div className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-2">
                 <Video className="w-5 h-5 text-white" />

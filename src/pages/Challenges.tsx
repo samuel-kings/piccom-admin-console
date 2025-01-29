@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ContentStatus } from '../models/challenge';
+import { Challenge, ContentStatus } from '../models/challenge';
 import { Plus, Filter, Search, ChevronRight, ChevronLeft } from 'lucide-react';
 import Button from '../components/Button';
 import { updateChallenge, deleteChallenge } from '../services/challenge';
@@ -14,7 +14,7 @@ const Challenges: React.FC = () => {
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ContentStatus | 'all'>('all');
-  const [selectedChallenge, setSelectedChallenge] = useState(null);
+  const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
